@@ -8,4 +8,5 @@ npm start      # http://localhost:8080/
 npm run build
 ```
 
-Content: `src/_data/site.json`, `src/index.njk`. Deploy via GitHub Actions on push to `main`.
+Content: `src/_data/site.json`, `src/index.njk`.  
+CI builds Eleventy and publishes the `gh-pages` branch (Pages source: **gh-pages** / root).

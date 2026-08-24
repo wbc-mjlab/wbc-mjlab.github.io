@@ -1,6 +1,6 @@
-# Build and publish the org site to https://wbc-mjlab.github.io/
+# Build Eleventy and publish to the gh-pages branch → https://wbc-mjlab.github.io/
 #
-# One-time: Settings → Pages → Source = "GitHub Actions".
+# Pages source: Settings → Pages → Deploy from branch → gh-pages / (root)
 name: Deploy Pages
 
 on:
@@ -9,16 +9,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,7 +25,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -38,21 +36,12 @@ jobs:
           PATH_PREFIX: /
         run: npm run build
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
+      - name: Add .nojekyll
+        run: touch _site/.nojekyll
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: _site
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _site
+          force_orphan: true
