@@ -1,0 +1,161 @@
+{
+  "title": "wbc-mjlab",
+  "subtitle": "Unified Whole-Body Motion Tracking on mjlab",
+  "url": "https://wbc-mjlab.github.io/",
+  "org": "https://github.com/wbc-mjlab",
+  "year": 2026,
+  "authors": [
+    { "name": "Simeon Nedelchev", "affiliations": [1] },
+    { "name": "Anton Chaplygin", "affiliations": [2] },
+    { "name": "Lev Kozlov", "affiliations": [3] },
+    { "name": "Ivan Domrachev", "affiliations": [3] }
+  ],
+  "affiliations": [
+    "Innopolis University",
+    "Robotics Center",
+    "KAIST"
+  ],
+  "links": [
+    { "label": "Code", "url": "https://github.com/wbc-mjlab/wbc-mjlab" },
+    { "label": "Docs", "url": "https://wbc-mjlab.github.io/wbc-mjlab/" },
+    { "label": "Demo", "url": "https://wbc-mjlab.github.io/wbc-demo/" },
+    { "label": "PyPI", "url": "https://pypi.org/project/wbc-mjlab/" },
+    { "label": "Video", "url": "https://youtu.be/qTVkqvrJZM0" },
+    { "label": "Colab", "url": "https://colab.research.google.com/github/wbc-mjlab/wbc-mjlab/blob/main/notebooks/demo.ipynb" }
+  ],
+  "demoUrl": "https://wbc-mjlab.github.io/wbc-demo/",
+  "teaser": {
+    "video": "assets/wbc_g1_hardware_collage.mp4",
+    "poster": "assets/collage.jpg",
+    "caption": "Unitree G1 — one policy, many skills (get-up, idle, dance, fight, sprint, sideflip)."
+  },
+  "abstract": "We present wbc-mjlab, an open-source training library for whole-body motion tracking on mjlab. The library factors the low-level tracker shared by recent humanoid systems into one manager-based MDP: scaled residual joint actions, a multi-clip motion command with adaptive reference-state initialization (RSI), exponential tracking rewards on anchor and keybody kinematics, and a composable catalog of motion-reference observations. Paper-specific choices—ZEST-style end-effector tracking, BeyondMimic-style binary-failure RSI, state-estimation actor layouts—are expressed as presets on the same template rather than separate codebases. Robots plug in via extension packages; training emits artifacts for modular deploy (hardware runtime and in-browser demo).",
+  "quickstart": {
+    "intro": "Fastest path: try the live demo (no GPU). To train locally you need mjlab (≥ 1.5) and an NVIDIA GPU. Full install notes are in the docs.",
+    "steps": [
+      {
+        "title": "Browser demo",
+        "text": "No install — open the WASM + ONNX gallery and switch clips.",
+        "href": "https://wbc-mjlab.github.io/wbc-demo/",
+        "hrefLabel": "wbc-mjlab.github.io/wbc-demo"
+      },
+      {
+        "title": "Clone & list tasks",
+        "code": "git clone https://github.com/wbc-mjlab/wbc-mjlab.git && cd wbc-mjlab\nuv run wbc-mjlab-list-envs"
+      },
+      {
+        "title": "Convert sample clips → NPZ",
+        "text": "Bundled G1 samples (CSV → FK bodies / velocities).",
+        "code": "uv run wbc-mjlab-data-to-npz --robot g1 --dataset samples --batch-size 8"
+      },
+      {
+        "title": "Train (default WBC)",
+        "text": "Paper recipes are --task switches on the same MDP (e.g. Wbc-G1-Zest).",
+        "code": "uv run wbc-mjlab-train --task Wbc-G1 --dataset samples"
+      },
+      {
+        "title": "Play / export",
+        "text": "Play disables training aids so rollouts match deploy; exports policy.onnx + config.yaml.",
+        "code": "uv run wbc-mjlab-play --task Wbc-G1 --dataset samples"
+      }
+    ],
+    "note": "uv run syncs from uv.lock on first use. CUDA/CPU PyTorch: make sync / make sync-cpu."
+  },
+  "notes": [
+    {
+      "title": "Config assembly",
+      "text": "Each task is base MDP template \\(\\rightarrow\\) robot entity \\(\\rightarrow\\) preset(s) \\(\\rightarrow\\) registered <code>--task</code> id. Presets are pure config functions on one template (no env fork); ablations are task switches, not code branches. Adaptive RSI samples a (clip, temporal bin, frame) on episode reset inside the motion command—not between reward and observation each step."
+    },
+    {
+      "title": "Single command, slot-based MDP",
+      "text": "Rewards, RSI, reference observations, and assistive wrench all read one motion command. Parallel envs may track different clips from the same NPZ library; body lists and weights stay in config, not hard-coded skeletons."
+    },
+    {
+      "title": "Scaled residual actions",
+      "text": "The default policy outputs a residual \\(a_t\\) added to the motion-command reference joints before PD. Per-joint scales \\(s\\) travel with the robot entity (often \\(s_j \\approx 0.25\\,\\tau^{\\max}_j / k_{p,j}\\)), so the same preset stack ports across humanoids.",
+      "eq": "q^{\\mathrm{des}}_t = q^{\\mathrm{ref}}_t + s \\odot a_t"
+    },
+    {
+      "title": "Anchor-relative keybody targets",
+      "text": "Style rewards compare limbs in a yaw-aligned anchor frame (horizontal from the robot anchor, height from the reference). Matches deploy where global drift is partly unobservable but relative limb pose is not."
+    },
+    {
+      "title": "Adaptive RSI",
+      "text": "Clips are partitioned into bins of width \\(\\Delta \\approx 4\\,\\mathrm{s}\\); failure EMAs drive softmax sampling with a uniform floor \\(\\rho \\approx 0.15\\). Default WBC/ZEST score bins with the same weighted tracking rewards used for learning (reward-aligned); a BeyondMimic-style preset switches to binary-failure RSI (early terminate \\(\\Rightarrow\\) \\(f = 1\\)).",
+      "eq": "\\bar f_{\\tau,b} \\leftarrow (1-\\alpha)\\,\\bar f_{\\tau,b} + \\alpha\\, f_{\\tau,b}"
+    },
+    {
+      "title": "Modular reference observations",
+      "text": "Reference kinematics are independent catalog terms (not one bundled command vector). Presets drop, swap, or reorder entries—and add per-term noise—without changing playback or rewards. A state-estimation actor preset composes with any tracking preset by swapping pose-error terms into the actor."
+    },
+    {
+      "title": "Assistive wrench (train only)",
+      "text": "Optional ZEST-style spatial wrench on the anchor with gain \\(\\beta \\in [0, \\beta_{\\max}]\\) from the sampled bin’s failure level. Play and deploy disable it—it is a curriculum aid, not part of the exported policy."
+    },
+    {
+      "title": "Train vs. play split",
+      "text": "Play disables observation corruption, motion DR, assistive wrench, and pushes so in-sim evaluation matches deploy; training keeps those aids on."
+    },
+    {
+      "title": "In-tree G1 tasks",
+      "text": "Paper knobs are configuration: <code>Wbc-G1</code> (all keybodies, reward-aligned RSI), <code>Wbc-G1-Zest</code> (end-effector body rewards), <code>Wbc-G1-BinaryFailure</code> (BeyondMimic-style binary RSI), and <code>…-SE</code> variants that swap in a state-estimation actor (pose errors + base linear velocity)."
+    },
+    {
+      "title": "Export contract",
+      "text": "Training emits <code>policy.onnx</code> + <code>config.yaml</code> for modular runtimes (<code>wbc-g1-deploy</code>, <code>wbc-demo</code>) without importing the trainer. At deploy, the reference stream may be clips, teleop, or a higher-level policy; planning UIs and drivers stay outside the training repo."
+    },
+    {
+      "title": "Robot extensions",
+      "text": "New platforms ship as packages via <code>register_wbc_extension</code> (entity, task builder, data paths)—same CLIs as G1. See <code>wbc-mjlab-extension-h2</code>; no changes to the shared tracker required."
+    }
+  ],
+  "repos": [
+    {
+      "name": "wbc-mjlab",
+      "blurb": "Training — shared MDP, presets, G1 tasks, ONNX export",
+      "url": "https://github.com/wbc-mjlab/wbc-mjlab"
+    },
+    {
+      "name": "wbc-mjlab-extension-h2",
+      "blurb": "Reference H2 robot extension (no core fork)",
+      "url": "https://github.com/wbc-mjlab/wbc-mjlab-extension-h2"
+    },
+    {
+      "name": "wbc-g1-deploy",
+      "blurb": "G1 onboard runtime — one policy, clip library",
+      "url": "https://github.com/wbc-mjlab/wbc-g1-deploy"
+    },
+    {
+      "name": "wbc-demo",
+      "blurb": "Live MuJoCo + ONNX in the browser",
+      "url": "https://github.com/wbc-mjlab/wbc-demo"
+    }
+  ],
+  "related": [
+    {
+      "title": "mjlab",
+      "url": "https://arxiv.org/abs/2601.22074",
+      "extra": "https://github.com/mujocolab/mjlab",
+      "extraLabel": "code"
+    },
+    {
+      "title": "BeyondMimic",
+      "url": "https://arxiv.org/abs/2508.08241",
+      "extra": "https://beyondmimic.github.io/",
+      "extraLabel": "project"
+    },
+    {
+      "title": "ZEST",
+      "url": "https://arxiv.org/abs/2602.00401"
+    },
+    {
+      "title": "SONIC",
+      "url": "https://arxiv.org/abs/2511.07820"
+    },
+    {
+      "title": "OmniXtreme",
+      "url": "https://arxiv.org/abs/2602.23843"
+    }
+  ],
+  "citation": "@misc{wbc-mjlab,\n  title        = {wbc-mjlab: Unified Whole-Body Motion Tracking on mjlab},\n  author       = {Nedelchev, Simeon and Chaplygin, Anton and Kozlov, Lev and Domrachev, Ivan},\n  year         = {2026},\n  howpublished = {\\url{https://github.com/wbc-mjlab/wbc-mjlab}}\n}"
+}

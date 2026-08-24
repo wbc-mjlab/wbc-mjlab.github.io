@@ -1,0 +1,153 @@
+---
+layout: base.njk
+permalink: /
+---
+
+<main class="page">
+  <header class="hero">
+    <h1>{{ site.title }}</h1>
+    <p class="subtitle">{{ site.subtitle }}</p>
+
+    <p class="authors">
+      {% for author in site.authors %}
+      <span>{{ author.name }}<sup>{% for a in author.affiliations %}{{ a }}{% if not loop.last %},{% endif %}{% endfor %}</sup></span>{% if not loop.last %}&ensp;{% endif %}
+      {% endfor %}
+    </p>
+    <p class="affils">
+      {% for aff in site.affiliations %}
+      <span><sup>{{ loop.index }}</sup>{{ aff }}</span>{% if not loop.last %}&ensp;{% endif %}
+      {% endfor %}
+    </p>
+
+    <p class="links">
+      {% for link in site.links %}
+      <a href="{{ link.url }}">[{{ link.label }}]</a>
+      {% endfor %}
+    </p>
+  </header>
+
+  <figure class="teaser">
+    <div class="teaser__frame">
+      <video
+        data-teaser
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster="{{ ('/' + site.teaser.poster) | url }}"
+      >
+        <source src="{{ ('/' + site.teaser.video) | url }}" type="video/mp4" />
+      </video>
+    </div>
+    <figcaption>{{ site.teaser.caption }}</figcaption>
+  </figure>
+
+  <section>
+    <h2>Abstract</h2>
+    <p>{{ site.abstract }}</p>
+  </section>
+
+  <section>
+    <h2>Interactive demo</h2>
+    <p class="muted">
+      Live MuJoCo WASM + ONNX policy in the browser
+      (<a href="{{ site.demoUrl }}">open fullscreen</a>).
+    </p>
+    <div class="demo" data-demo>
+      <button class="demo__load" type="button" data-demo-load>
+        <img
+          src="{{ '/assets/demo_screen.png' | url }}"
+          alt=""
+          width="1280"
+          height="720"
+          loading="lazy"
+        />
+        <span>Click to load interactive demo</span>
+      </button>
+      <iframe
+        class="demo__frame"
+        title="wbc-demo"
+        data-demo-src="{{ site.demoUrl }}"
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        hidden
+      ></iframe>
+    </div>
+  </section>
+
+  <section>
+    <h2>Try it fast</h2>
+    <p>{{ site.quickstart.intro }}</p>
+    <ol class="qs">
+      {% for step in site.quickstart.steps %}
+      <li>
+        <p class="qs__title"><strong>{{ step.title }}.</strong>
+          {% if step.text %}{{ step.text }}{% endif %}
+          {% if step.href %}
+          <a href="{{ step.href }}">{{ step.hrefLabel }}</a>
+          {% endif %}
+        </p>
+        {% if step.code %}
+        <pre class="listing"><code>{{ step.code }}</code></pre>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+    <p class="muted">{{ site.quickstart.note }}
+      See also the
+      <a href="https://wbc-mjlab.github.io/wbc-mjlab/source/installation.html">installation guide</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Particularities</h2>
+    {% for item in site.notes %}
+    <div class="tech-note">
+      <p class="para">
+        <strong>{{ item.title }}.</strong>
+        {{ item.text | safe }}
+      </p>
+      {% if item.eq %}
+      <p class="eq">\[ {{ item.eq | safe }} \]</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </section>
+
+  <section>
+    <h2>Code</h2>
+    <ul class="repos">
+      {% for repo in site.repos %}
+      <li>
+        <a href="{{ repo.url }}"><code>{{ repo.name }}</code></a>
+        — {{ repo.blurb }}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section>
+    <h2>Related</h2>
+    <p class="related">
+      {% for ref in site.related %}
+      <a href="{{ ref.url }}">{{ ref.title }}</a>{% if ref.extra %}
+      (<a href="{{ ref.extra }}">{{ ref.extraLabel }}</a>){% endif %}{% if not loop.last %} · {% endif %}
+      {% endfor %}
+    </p>
+  </section>
+
+  <section>
+    <div class="bib-head">
+      <h2>BibTeX</h2>
+      <button class="copy" type="button" data-copy-bib>Copy</button>
+    </div>
+    <pre><code data-bib>{{ site.citation }}</code></pre>
+  </section>
+
+  <footer>
+    <a href="{{ site.org }}">github.com/wbc-mjlab</a>
+    · {{ site.year }}
+  </footer>
+</main>
