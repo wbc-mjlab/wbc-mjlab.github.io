@@ -42,6 +42,39 @@
       frame.hidden = false;
       demo.classList.add("is-loaded");
     });
+
+    // Same-origin wbc-demo: start the embed in tracking with HUD hidden (H),
+    // without requiring demo URL/API changes.
+    frame.addEventListener("load", function () {
+      var win = frame.contentWindow;
+      var tries = 0;
+      var timer = setInterval(function () {
+        tries += 1;
+        try {
+          if (!win || !win.__engine) {
+            if (tries > 100) clearInterval(timer);
+            return;
+          }
+          clearInterval(timer);
+          var doc = win.document;
+          var root = doc && doc.querySelector("#lv-root");
+          if (!root || root.getAttribute("data-hud") === "off") return;
+          // Dispatch on <body> so the demo key handler's HTMLElement check passes.
+          var body = doc.body;
+          if (!body) return;
+          body.dispatchEvent(
+            new KeyboardEvent("keydown", {
+              code: "KeyH",
+              key: "h",
+              bubbles: true,
+              cancelable: true,
+            })
+          );
+        } catch (_) {
+          clearInterval(timer);
+        }
+      }, 300);
+    });
   }
 
   var copyBtn = document.querySelector("[data-copy-bib]");

@@ -24,6 +24,7 @@
     { "label": "Colab", "url": "https://colab.research.google.com/github/wbc-mjlab/wbc-mjlab/blob/main/notebooks/demo.ipynb" }
   ],
   "demoUrl": "https://wbc-mjlab.github.io/wbc-demo/",
+  "demoEmbedUrl": "https://wbc-mjlab.github.io/wbc-demo/tracking.html",
   "teaser": {
     "video": "assets/wbc_g1_hardware_collage.mp4",
     "poster": "assets/collage.jpg",
