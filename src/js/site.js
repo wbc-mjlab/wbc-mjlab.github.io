@@ -33,16 +33,9 @@
   }
 
   var demo = document.querySelector("[data-demo]");
-  var loadBtn = document.querySelector("[data-demo-load]");
   var frame = document.querySelector("[data-demo-src]");
 
-  if (demo && loadBtn && frame) {
-    loadBtn.addEventListener("click", function () {
-      frame.src = frame.getAttribute("data-demo-src");
-      frame.hidden = false;
-      demo.classList.add("is-loaded");
-    });
-
+  if (demo && frame) {
     // Same-origin wbc-demo: start the embed in tracking with HUD hidden (H),
     // without requiring demo URL/API changes.
     frame.addEventListener("load", function () {

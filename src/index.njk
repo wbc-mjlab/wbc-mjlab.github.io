@@ -54,25 +54,15 @@ permalink: /
       Live MuJoCo WASM + ONNX policy in the browser
       (<a href="{{ site.demoUrl }}">open fullscreen</a>).
     </p>
-    <div class="demo" data-demo>
-      <button class="demo__load" type="button" data-demo-load>
-        <img
-          src="{{ '/assets/demo_screen.png' | url }}"
-          alt=""
-          width="1280"
-          height="720"
-          loading="lazy"
-        />
-        <span>Click to load interactive demo</span>
-      </button>
+    <div class="demo is-loaded" data-demo>
       <iframe
         class="demo__frame"
         title="wbc-demo"
+        src="{{ site.demoEmbedUrl }}"
         data-demo-src="{{ site.demoEmbedUrl }}"
-        loading="lazy"
+        loading="eager"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen
-        hidden
       ></iframe>
     </div>
   </section>
