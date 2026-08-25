@@ -228,6 +228,97 @@ section p {
   text-align: left !important;
 }
 
+.demo__controls {
+  margin: 0.55rem 0 1rem;
+  padding: 0.55rem 0.9rem 0.75rem;
+  border: 0.4pt solid var(--accent-line);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--code-fg);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+.demo__controls > summary {
+  cursor: pointer;
+  list-style: none;
+  margin: 0;
+  padding: 0.15rem 0 0.15rem 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+.demo__controls > summary::-webkit-details-marker {
+  display: none;
+}
+.demo__controls > summary::after {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 120ms ease;
+  flex: 0 0 auto;
+}
+.demo__controls[open] > summary::after {
+  transform: rotate(-135deg);
+}
+.demo__controls[open] > summary {
+  margin-bottom: 0.55rem;
+}
+.demo__controls-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.demo__controls-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+.demo__controls-list li + li {
+  margin-top: 0.45rem;
+}
+.demo__btns {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  min-width: 5.4rem;
+}
+.demo__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 0.4pt solid var(--accent-line);
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+.demo__btn svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
+}
+.demo__btn--key {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--code-fg);
+}
+
 .demo {
   position: relative;
   border: 0.4pt solid var(--line);

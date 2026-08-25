@@ -51,9 +51,62 @@ permalink: /
   <section>
     <h2>Interactive demo</h2>
     <p class="muted">
-      Live MuJoCo WASM + ONNX policy in the browser
-      (<a href="{{ site.demoUrl }}">open fullscreen</a>).
+      A real MuJoCo sim and ONNX whole-body policy run live in your browser
+      (WASM — no install). The robot tracks a reference motion clip;
+      (<a href="{{ site.demoUrl }}">open fullscreen</a> for the full UI, including generator mode).
     </p>
+    <details class="demo__controls" open>
+      <summary id="demo-controls-title">Controls</summary>
+      <ul class="demo__controls-list">
+        <li>
+          <span class="demo__btns" aria-hidden="true">
+            <span class="demo__btn" title="Trajectory">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </span>
+          </span>
+          <span>pick a clip from the dropdown (top right).</span>
+        </li>
+        <li>
+          <span class="demo__btns" aria-hidden="true">
+            <span class="demo__btn" title="Play">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            </span>
+            <span class="demo__btn" title="Pause">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></svg>
+            </span>
+            <span class="demo__btn" title="Loop">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            </span>
+          </span>
+          <span>play, pause, loop clip (not policy).</span>
+        </li>
+        <li>
+          <span class="demo__btns" aria-hidden="true">
+            <span class="demo__btn" title="Get up">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+            </span>
+            <span class="demo__btn" title="Lie down">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+            </span>
+          </span>
+          <span>get up when down, lie down when idle.</span>
+        </li>
+        <li>
+          <span class="demo__btns" aria-hidden="true">
+            <span class="demo__btn" title="Mouse">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v4"/></svg>
+            </span>
+          </span>
+          <span>click-drag the robot to push/pull; empty space orbits the camera.</span>
+        </li>
+        <li>
+          <span class="demo__btns" aria-hidden="true">
+            <span class="demo__btn demo__btn--key" title="R">R</span>
+          </span>
+          <span>reset pose.</span>
+        </li>
+      </ul>
+    </details>
     <div class="demo is-loaded" data-demo>
       <iframe
         class="demo__frame"
