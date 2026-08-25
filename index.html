@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>wbc-mjlab — Unified Whole-Body Motion Tracking on mjlab</title>
+  <meta name="description" content="We present wbc-mjlab, an open-source training library for whole-body motion tracking on mjlab. The library factors the low-level tracker shared by recent..." />
+  <meta property="og:title" content="wbc-mjlab: Unified Whole-Body Motion Tracking on mjlab" />
+  <meta property="og:description" content="We present wbc-mjlab, an open-source training library for whole-body motion tracking on mjlab. The library factors the low-level tracker shared by recent..." />
+  <meta property="og:image" content="/assets/collage.jpg" />
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/dreampulse/computer-modern-web-font@master/font/Serif/cmun-serif.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/dreampulse/computer-modern-web-font@master/font/Typewriter/cmun-typewriter.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+  
+<main class="page">
+  <header class="hero">
+    <h1>wbc-mjlab</h1>
+    <p class="subtitle">Unified Whole-Body Motion Tracking on mjlab</p>
+
+    <p class="authors">
+      
+      <span>Simeon Nedelchev<sup>1</sup></span>&ensp;
+      
+      <span>Anton Chaplygin<sup>2</sup></span>&ensp;
+      
+      <span>Lev Kozlov<sup>3</sup></span>&ensp;
+      
+      <span>Ivan Domrachev<sup>3</sup></span>
+      
+    </p>
+    <p class="affils">
+      
+      <span><sup>1</sup>Innopolis University</span>&ensp;
+      
+      <span><sup>2</sup>Robotics Center</span>&ensp;
+      
+      <span><sup>3</sup>KAIST</span>
+      
+    </p>
+
+    <p class="links">
+      
+      <a href="https://github.com/wbc-mjlab/wbc-mjlab">[Code]</a>
+      
+      <a href="https://wbc-mjlab.github.io/wbc-mjlab/">[Docs]</a>
+      
+      <a href="https://wbc-mjlab.github.io/wbc-demo/">[Demo]</a>
+      
+      <a href="https://pypi.org/project/wbc-mjlab/">[PyPI]</a>
+      
+      <a href="https://youtu.be/qTVkqvrJZM0">[Video]</a>
+      
+      <a href="https://colab.research.google.com/github/wbc-mjlab/wbc-mjlab/blob/main/notebooks/demo.ipynb">[Colab]</a>
+      
+    </p>
+  </header>
+
+  <figure class="teaser">
+    <div class="teaser__frame">
+      <video
+        data-teaser
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster="/assets/collage.jpg"
+      >
+        <source src="/assets/wbc_g1_hardware_collage.mp4" type="video/mp4" />
+      </video>
+    </div>
+    <figcaption>Unitree G1 — one policy, many skills (get-up, idle, dance, fight, sprint, sideflip).</figcaption>
+  </figure>
+
+  <section>
+    <h2>Abstract</h2>
+    <p>We present wbc-mjlab, an open-source training library for whole-body motion tracking on mjlab. The library factors the low-level tracker shared by recent humanoid systems into one manager-based MDP: scaled residual joint actions, a multi-clip motion command with adaptive reference-state initialization (RSI), exponential tracking rewards on anchor and keybody kinematics, and a composable catalog of motion-reference observations. Paper-specific choices—ZEST-style end-effector tracking, BeyondMimic-style binary-failure RSI, state-estimation actor layouts—are expressed as presets on the same template rather than separate codebases. Robots plug in via extension packages; training emits artifacts for modular deploy (hardware runtime and in-browser demo).</p>
+  </section>
+
+  <section>
+    <h2>Interactive demo</h2>
+    <p class="muted">
+      A real MuJoCo sim and ONNX whole-body policy run live in your browser
+      (WASM — no install). The robot tracks a reference motion clip;
+      (<a href="https://wbc-mjlab.github.io/wbc-demo/">open fullscreen</a> for the full UI, including generator mode).
+    </p>
+    <details class="demo__controls" open>
+      <summary id="demo-controls-title">Controls</summary>
+      <ul class="demo__controls-list">
+        <li>
+          <span class="demo__btns" aria-hidden="true">
+            <span class="demo__btn" title="Trajectory">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </span>
+          </span>
+          <span>pick a clip from the dropdown (top right).</span>
+        </li>
+        <li>
+          <span class="demo__btns" aria-hidden="true">
+            <span class="demo__btn" title="Play">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            </span>
+            <span class="demo__btn" title="Pause">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></svg>
+            </span>
+            <span class="demo__btn" title="Loop">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            </span>
+          </span>
+          <span>play, pause, loop clip (not policy).</span>
+        </li>
+        <li>
+          <span class="demo__btns" aria-hidden="true">
+            <span class="demo__btn" title="Get up">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+            </span>
+            <span class="demo__btn" title="Lie down">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+            </span>
+          </span>
+          <span>get up when down, lie down when idle.</span>
+        </li>
+        <li>
+          <span class="demo__btns" aria-hidden="true">
+            <span class="demo__btn" title="Mouse">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v4"/></svg>
+            </span>
+          </span>
+          <span>click-drag the robot to push/pull; empty space orbits the camera.</span>
+        </li>
+        <li>
+          <span class="demo__btns" aria-hidden="true">
+            <span class="demo__btn demo__btn--key" title="R">R</span>
+          </span>
+          <span>reset pose.</span>
+        </li>
+      </ul>
+    </details>
+    <div class="demo is-loaded" data-demo>
+      <iframe
+        class="demo__frame"
+        title="wbc-demo"
+        src="https://wbc-mjlab.github.io/wbc-demo/tracking.html"
+        data-demo-src="https://wbc-mjlab.github.io/wbc-demo/tracking.html"
+        loading="eager"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      ></iframe>
+    </div>
+  </section>
+
+  <section>
+    <h2>Try it fast</h2>
+    <p>Fastest path: try the live demo (no GPU). To train locally you need mjlab (≥ 1.5) and an NVIDIA GPU. Full install notes are in the docs.</p>
+    <ol class="qs">
+      
+      <li>
+        <p class="qs__title"><strong>Browser demo.</strong>
+          No install — open the WASM + ONNX gallery and switch clips.
+          
+          <a href="https://wbc-mjlab.github.io/wbc-demo/">wbc-mjlab.github.io/wbc-demo</a>
+          
+        </p>
+        
+      </li>
+      
+      <li>
+        <p class="qs__title"><strong>Clone &amp; list tasks.</strong>
+          
+          
+        </p>
+        
+        <pre class="listing"><code>git clone https://github.com/wbc-mjlab/wbc-mjlab.git &amp;&amp; cd wbc-mjlab
+uv run wbc-mjlab-list-envs</code></pre>
+        
+      </li>
+      
+      <li>
+        <p class="qs__title"><strong>Convert sample clips → NPZ.</strong>
+          Bundled G1 samples (CSV → FK bodies / velocities).
+          
+        </p>
+        
+        <pre class="listing"><code>uv run wbc-mjlab-data-to-npz --robot g1 --dataset samples --batch-size 8</code></pre>
+        
+      </li>
+      
+      <li>
+        <p class="qs__title"><strong>Train (default WBC).</strong>
+          Paper recipes are --task switches on the same MDP (e.g. Wbc-G1-Zest).
+          
+        </p>
+        
+        <pre class="listing"><code>uv run wbc-mjlab-train --task Wbc-G1 --dataset samples</code></pre>
+        
+      </li>
+      
+      <li>
+        <p class="qs__title"><strong>Play / export.</strong>
+          Play disables training aids so rollouts match deploy; exports policy.onnx + config.yaml.
+          
+        </p>
+        
+        <pre class="listing"><code>uv run wbc-mjlab-play --task Wbc-G1 --dataset samples</code></pre>
+        
+      </li>
+      
+    </ol>
+    <p class="muted">uv run syncs from uv.lock on first use. CUDA/CPU PyTorch: make sync / make sync-cpu.
+      See also the
+      <a href="https://wbc-mjlab.github.io/wbc-mjlab/source/installation.html">installation guide</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Particularities</h2>
+    
+    <div class="tech-note">
+      <p class="para">
+        <strong>Config assembly.</strong>
+        Each task is base MDP template \(\rightarrow\) robot entity \(\rightarrow\) preset(s) \(\rightarrow\) registered <code>--task</code> id. Presets are pure config functions on one template (no env fork); ablations are task switches, not code branches. Adaptive RSI samples a (clip, temporal bin, frame) on episode reset inside the motion command—not between reward and observation each step.
+      </p>
+      
+    </div>
+    
+    <div class="tech-note">
+      <p class="para">
+        <strong>Single command, slot-based MDP.</strong>
+        Rewards, RSI, reference observations, and assistive wrench all read one motion command. Parallel envs may track different clips from the same NPZ library; body lists and weights stay in config, not hard-coded skeletons.
+      </p>
+      
+    </div>
+    
+    <div class="tech-note">
+      <p class="para">
+        <strong>Scaled residual actions.</strong>
+        The default policy outputs a residual \(a_t\) added to the motion-command reference joints before PD. Per-joint scales \(s\) travel with the robot entity (often \(s_j \approx 0.25\,\tau^{\max}_j / k_{p,j}\)), so the same preset stack ports across humanoids.
+      </p>
+      
+      <p class="eq">\[ q^{\mathrm{des}}_t = q^{\mathrm{ref}}_t + s \odot a_t \]</p>
+      
+    </div>
+    
+    <div class="tech-note">
+      <p class="para">
+        <strong>Anchor-relative keybody targets.</strong>
+        Style rewards compare limbs in a yaw-aligned anchor frame (horizontal from the robot anchor, height from the reference). Matches deploy where global drift is partly unobservable but relative limb pose is not.
+      </p>
+      
+    </div>
+    
+    <div class="tech-note">
+      <p class="para">
+        <strong>Adaptive RSI.</strong>
+        Clips are partitioned into bins of width \(\Delta \approx 4\,\mathrm{s}\); failure EMAs drive softmax sampling with a uniform floor \(\rho \approx 0.15\). Default WBC/ZEST score bins with the same weighted tracking rewards used for learning (reward-aligned); a BeyondMimic-style preset switches to binary-failure RSI (early terminate \(\Rightarrow\) \(f = 1\)).
+      </p>
+      
+      <p class="eq">\[ \bar f_{\tau,b} \leftarrow (1-\alpha)\,\bar f_{\tau,b} + \alpha\, f_{\tau,b} \]</p>
+      
+    </div>
+    
+    <div class="tech-note">
+      <p class="para">
+        <strong>Modular reference observations.</strong>
+        Reference kinematics are independent catalog terms (not one bundled command vector). Presets drop, swap, or reorder entries—and add per-term noise—without changing playback or rewards. A state-estimation actor preset composes with any tracking preset by swapping pose-error terms into the actor.
+      </p>
+      
+    </div>
+    
+    <div class="tech-note">
+      <p class="para">
+        <strong>Assistive wrench (train only).</strong>
+        Optional ZEST-style spatial wrench on the anchor with gain \(\beta \in [0, \beta_{\max}]\) from the sampled bin’s failure level. Play and deploy disable it—it is a curriculum aid, not part of the exported policy.
+      </p>
+      
+    </div>
+    
+    <div class="tech-note">
+      <p class="para">
+        <strong>Train vs. play split.</strong>
+        Play disables observation corruption, motion DR, assistive wrench, and pushes so in-sim evaluation matches deploy; training keeps those aids on.
+      </p>
+      
+    </div>
+    
+    <div class="tech-note">
+      <p class="para">
+        <strong>In-tree G1 tasks.</strong>
+        Paper knobs are configuration: <code>Wbc-G1</code> (all keybodies, reward-aligned RSI), <code>Wbc-G1-Zest</code> (end-effector body rewards), <code>Wbc-G1-BinaryFailure</code> (BeyondMimic-style binary RSI), and <code>…-SE</code> variants that swap in a state-estimation actor (pose errors + base linear velocity).
+      </p>
+      
+    </div>
+    
+    <div class="tech-note">
+      <p class="para">
+        <strong>Export contract.</strong>
+        Training emits <code>policy.onnx</code> + <code>config.yaml</code> for modular runtimes (<code>wbc-g1-deploy</code>, <code>wbc-demo</code>) without importing the trainer. At deploy, the reference stream may be clips, teleop, or a higher-level policy; planning UIs and drivers stay outside the training repo.
+      </p>
+      
+    </div>
+    
+    <div class="tech-note">
+      <p class="para">
+        <strong>Robot extensions.</strong>
+        New platforms ship as packages via <code>register_wbc_extension</code> (entity, task builder, data paths)—same CLIs as G1. See <code>wbc-mjlab-extension-h2</code>; no changes to the shared tracker required.
+      </p>
+      
+    </div>
+    
+  </section>
+
+  <section>
+    <h2>Code</h2>
+    <ul class="repos">
+      
+      <li>
+        <a href="https://github.com/wbc-mjlab/wbc-mjlab"><code>wbc-mjlab</code></a>
+        — Training — shared MDP, presets, G1 tasks, ONNX export
+      </li>
+      
+      <li>
+        <a href="https://github.com/wbc-mjlab/wbc-mjlab-extension-h2"><code>wbc-mjlab-extension-h2</code></a>
+        — Reference H2 robot extension (no core fork)
+      </li>
+      
+      <li>
+        <a href="https://github.com/wbc-mjlab/wbc-g1-deploy"><code>wbc-g1-deploy</code></a>
+        — G1 onboard runtime — one policy, clip library
+      </li>
+      
+      <li>
+        <a href="https://github.com/wbc-mjlab/wbc-demo"><code>wbc-demo</code></a>
+        — Live MuJoCo + ONNX in the browser
+      </li>
+      
+    </ul>
+  </section>
+
+  <section>
+    <h2>Related</h2>
+    <p class="related">
+      
+      <a href="https://arxiv.org/abs/2601.22074">mjlab</a>
+      (<a href="https://github.com/mujocolab/mjlab">code</a>) · 
+      
+      <a href="https://arxiv.org/abs/2508.08241">BeyondMimic</a>
+      (<a href="https://beyondmimic.github.io/">project</a>) · 
+      
+      <a href="https://arxiv.org/abs/2602.00401">ZEST</a> · 
+      
+      <a href="https://arxiv.org/abs/2511.07820">SONIC</a> · 
+      
+      <a href="https://arxiv.org/abs/2602.23843">OmniXtreme</a>
+      
+    </p>
+  </section>
+
+  <section>
+    <div class="bib-head">
+      <h2>BibTeX</h2>
+      <button class="copy" type="button" data-copy-bib>Copy</button>
+    </div>
+    <pre><code data-bib>@misc{wbc-mjlab,
+  title        = {wbc-mjlab: Unified Whole-Body Motion Tracking on mjlab},
+  author       = {Nedelchev, Simeon and Chaplygin, Anton and Kozlov, Lev and Domrachev, Ivan},
+  year         = {2026},
+  howpublished = {&#92;url{https://github.com/wbc-mjlab/wbc-mjlab}}
+}</code></pre>
+  </section>
+
+  <footer>
+    <a href="https://github.com/wbc-mjlab">github.com/wbc-mjlab</a>
+    · 2026
+  </footer>
+</main>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+  <script src="/js/site.js" defer></script>
+</body>
+</html>
